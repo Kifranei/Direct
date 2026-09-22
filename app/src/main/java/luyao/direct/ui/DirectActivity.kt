@@ -218,6 +218,17 @@ class DirectActivity : DirectBaseActivity(),
             }
         }
 
+    // 快捷方式指定应用
+    val chooseDirectAppForEditLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+            activityResult.data?.let {
+                val packageName = it.getStringExtra("packageName") ?: ""
+                if (directEditDialog?.isShowing == true && packageName.isNotEmpty()) {
+                    directEditDialog?.setPackageName(packageName)
+                }
+            }
+        }
+
     // 图标选择应用
     val chooseAppLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
@@ -315,7 +326,10 @@ class DirectActivity : DirectBaseActivity(),
     private fun initSearch() {
         binding.searchEt.onActionSearch { text ->
             if (MMKVConstants.enterChoice == 0) { // 默认搜索引擎
-                vm.defaultSearchEntity.value?.go(this, text)
+                vm.defaultSearchEntity.value?.let {
+                    vm.copySearchContent(text, isSearchEngineSearch = true)
+                    it.go(this, text)
+                }
                 saveSearchHistory(text, SearchHistoryEntity.ENGINE)
                 if (MMKVConstants.autoClose) {
                     finish()
@@ -341,6 +355,7 @@ class DirectActivity : DirectBaseActivity(),
                                 val lastIndex = binding.searchEt.text.toString()
                                     .lastIndexOf(MMKVConstants.engineTag)
                                 val word = binding.searchEt.text.toString().substring(0, lastIndex)
+                                vm.copySearchContent(word, isSearchEngineSearch = true)
                                 data.go(this@DirectActivity, word)
                                 saveSearchHistory(word, SearchHistoryEntity.ENGINE)
                             }
@@ -350,7 +365,10 @@ class DirectActivity : DirectBaseActivity(),
                         finish()
                     }
                 } else if (MMKVConstants.openEngineIfNoSearchResult) {
-                    vm.defaultSearchEntity.value?.go(this, text)
+                    vm.defaultSearchEntity.value?.let {
+                        vm.copySearchContent(text, isSearchEngineSearch = true)
+                        it.go(this, text)
+                    }
                     saveSearchHistory(text, SearchHistoryEntity.ENGINE)
                     if (MMKVConstants.autoClose) {
                         finish()
@@ -452,6 +470,7 @@ class DirectActivity : DirectBaseActivity(),
         tagEngineViewDelegate.setItemClickListener {
             val lastIndex = binding.searchEt.text.toString().lastIndexOf(MMKVConstants.engineTag)
             val word = binding.searchEt.text.toString().substring(0, lastIndex)
+            vm.copySearchContent(word, isSearchEngineSearch = true)
             it.go(this@DirectActivity, word)
             saveSearchHistory(word, SearchHistoryEntity.ENGINE)
             if (MMKVConstants.autoClose) {
@@ -533,9 +552,9 @@ class DirectActivity : DirectBaseActivity(),
                 showKeyboard()
             }
 
-            if (MMKVConstants.showLastSearch && MMKVConstants.lastSearch.isNotBlank()) {
+            if (MMKVConstants.showLastSearch) {
                 binding.searchEt.setText(MMKVConstants.lastSearch)
-                if (MMKVConstants.selectionLastSearch) {
+                if (MMKVConstants.selectionLastSearch && MMKVConstants.lastSearch.isNotEmpty()) {
                     binding.searchEt.setSelection(0, MMKVConstants.lastSearch.length)
                 } else {
                     binding.searchEt.setSelection(MMKVConstants.lastSearch.length)
@@ -631,8 +650,10 @@ class DirectActivity : DirectBaseActivity(),
                     // 内容为空时点击，可快速切换默认搜索引擎
                     vm.saveDefaultEngine(it)
                 } else {
-                    it.go(this@DirectActivity, binding.searchEt.text.toString())
-                    saveSearchHistory(binding.searchEt.text.toString(), SearchHistoryEntity.ENGINE)
+                    val word = binding.searchEt.text.toString()
+                    vm.copySearchContent(word, isSearchEngineSearch = true)
+                    it.go(this@DirectActivity, word)
+                    saveSearchHistory(word, SearchHistoryEntity.ENGINE)
                     if (MMKVConstants.autoClose) {
                         finish()
                     }
@@ -798,6 +819,13 @@ class DirectActivity : DirectBaseActivity(),
     override fun onStart() {
         super.onStart()
         customTabActivityHelper?.bindCustomTabsService(this)
+    }
+
+    override fun onPause() {
+        if (MMKVConstants.showLastSearch) {
+            MMKVConstants.lastSearch = binding.searchEt.text?.toString().orEmpty()
+        }
+        super.onPause()
     }
 
     override fun onStop() {

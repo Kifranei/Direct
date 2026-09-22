@@ -36,9 +36,7 @@ class EngineEditViewDelegate :
     override fun onBindViewHolder(holder: ToolViewHolder, item: NewDirectEntity) {
         holder.binding.run {
             item.loadIcon(toolItem)
-            if (item.showPanel == 0) {
-                toolItem.alpha = 0.4f
-            }
+            toolItem.alpha = if (item.showPanel == 0) 0.4f else 1f
             toolRoot.setOnClickListener {
                 clickListener?.invoke(
                     item,

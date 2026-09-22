@@ -259,6 +259,8 @@
     <string name="float_window_icon">悬浮窗图标</string>
     <string name="float_window_note">点击快速打开直达。\n长按拖拽悬浮窗。\n若悬浮窗为条形，无法自定义图标。</string>
     <string name="auto_copy_when_search">搜索时自动复制搜索内容</string>
+    <string name="auto_copy_only_when_search_engine">仅用搜索引擎搜索时复制</string>
+    <string name="auto_copy_only_when_search_engine_summary">避免输入过程中反复改写剪切板</string>
     <string name="generate_launcher_shortcuts">生成桌面快捷方式</string>
     <string name="edit_direct">编辑快捷方式</string>
     <string name="not_support_shortcut">不支持桌面快捷方式</string>

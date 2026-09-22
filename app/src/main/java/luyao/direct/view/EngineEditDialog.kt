@@ -208,20 +208,9 @@ class EngineEditDialog(
                             Base64.encodeToString(localBitmap!!.toByteArray(), Base64.DEFAULT)
                         }
                         val engineList =
-                            AppDatabase.getInstance(DirectApp.App).directDao()
+                            AppDatabase.getInstance(DirectApp.App).newDirectDao()
                                 .getAllSearchEngine()
-                        var order = 0
-                        val start = 100000 // 从 100000 开始为用户手动添加
-
-                        if (engineList.isNotEmpty()) {
-                            order = engineList[engineList.size - 1].order + 1
-                        }
-
-                        val sortById = engineList.sortedBy { it.id }
-                        val id = if (engineList.isEmpty()) start else {
-                            val lastId = sortById[engineList.size - 1].id
-                            if (lastId < start) start else lastId + 1
-                        }
+                        val order = (engineList.maxOfOrNull { it.order } ?: -1) + 1
                         val directEntity = NewDirectEntity(
                             newUID(),
                             name,

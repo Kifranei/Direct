@@ -288,10 +288,21 @@ class SearchSettingFragment : PreferenceFragmentCompat() {
         }
 
         // 自动复制搜索内容
+        val autoCopyOnlyWhenSearchEngine =
+            findPreference<SwitchPreference>("autoCopyOnlyWhenSearchEngine")?.apply {
+                isChecked = MMKVConstants.autoCopyOnlyWhenSearchEngine
+                isVisible = MMKVConstants.autoCopyWhenSearch
+            }
         findPreference<SwitchPreference>("autoCopyWhenSearch")?.apply {
             isChecked = MMKVConstants.autoCopyWhenSearch
         }?.setOnPreferenceChangeListener { _, newValue ->
-            MMKVConstants.autoCopyWhenSearch = newValue as Boolean
+            val enabled = newValue as Boolean
+            MMKVConstants.autoCopyWhenSearch = enabled
+            autoCopyOnlyWhenSearchEngine?.isVisible = enabled
+            true
+        }
+        autoCopyOnlyWhenSearchEngine?.setOnPreferenceChangeListener { _, newValue ->
+            MMKVConstants.autoCopyOnlyWhenSearchEngine = newValue as Boolean
             true
         }
         // 联想源

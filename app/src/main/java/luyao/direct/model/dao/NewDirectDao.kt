@@ -46,7 +46,7 @@ interface NewDirectDao {
     @Query("select * from new_direct_entity where is_search = 1 and enabled = 0 order by id")
     fun loadSearchEngineOrderById(): List<NewDirectEntity>
 
-    @Query("select * from new_direct_entity where is_search = 1 and enabled = 0 and show_panel = 1 order by engine_order")
+    @Query("select * from new_direct_entity where is_search = 1 and enabled = 0 order by engine_order")
     fun getEnabledSearchEngine(): List<NewDirectEntity>
 
     @Query("select * from new_direct_entity where is_search = 1 order by engine_order")

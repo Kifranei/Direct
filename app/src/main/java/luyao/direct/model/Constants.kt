@@ -106,6 +106,10 @@ object MMKVConstants {
     var gestureVibrate by MMKVDelegate("gesture_vibrate", true) // 手势震动
     var floatWindowIconBase64 by MMKVDelegate("float_window_icon_base64", "") // 悬浮窗图标
     var autoCopyWhenSearch by MMKVDelegate("autoCopyWhenSearch", false) // 自动复制搜索内容
+    var autoCopyOnlyWhenSearchEngine by MMKVDelegate(
+        "auto_copy_only_when_search_engine",
+        false
+    ) // 仅使用搜索引擎搜索时自动复制
     var openEngineIfNoSearchResult by MMKVDelegate("open_engine_if_no_search_result", false) // 搜索无结果时打开搜索引擎
 
     var hasMoveNewDirectTable by MMKVDelegate("has_move_new_direct_table", false) // 是否已经迁移新的 directEntity 表

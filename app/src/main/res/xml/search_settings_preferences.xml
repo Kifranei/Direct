@@ -60,6 +60,12 @@
             app:key="autoCopyWhenSearch"
             app:title="@string/auto_copy_when_search" />
 
+        <SwitchPreference
+            android:icon="@drawable/ic_copy"
+            app:key="autoCopyOnlyWhenSearchEngine"
+            app:summary="@string/auto_copy_only_when_search_engine_summary"
+            app:title="@string/auto_copy_only_when_search_engine" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/input_association">

@@ -77,6 +77,22 @@ class DirectEditDialog(val activity: FragmentActivity, private val onRefresh: ()
         binding.directIcon.setImageBitmap(localBitmap)
     }
 
+    private fun chooseIconApp() {
+        val intent = Intent(activity, ChooseAppActivity::class.java)
+        when (activity) {
+            is DirectActivity -> activity.chooseAppIcon.launch(intent)
+            is AppDirectListActivity -> activity.chooseAppIcon.launch(intent)
+        }
+    }
+
+    private fun chooseTargetApp() {
+        val intent = Intent(activity, ChooseAppActivity::class.java)
+        when (activity) {
+            is DirectActivity -> activity.chooseDirectAppForEditLauncher.launch(intent)
+            is AppDirectListActivity -> activity.chooseDirectAppForEditLauncher.launch(intent)
+        }
+    }
+
     init {
         initView()
         setContentView(binding.root)
@@ -91,21 +107,7 @@ class DirectEditDialog(val activity: FragmentActivity, private val onRefresh: ()
                 showPopMenu(it)
             }
             directApp.setOnClickListener {
-                if (activity is DirectActivity) {
-                    activity.chooseAppIcon.launch(
-                        Intent(
-                            activity,
-                            ChooseAppActivity::class.java
-                        )
-                    )
-                } else if (activity is AppDirectListActivity) {
-                    activity.chooseAppIcon.launch(
-                        Intent(
-                            activity,
-                            ChooseAppActivity::class.java
-                        )
-                    )
-                }
+                chooseTargetApp()
             }
             directDelete.setOnClickListener { attemptDelete() }
             directConfirm.setOnClickListener { saveAppDirect() }
@@ -124,15 +126,7 @@ class DirectEditDialog(val activity: FragmentActivity, private val onRefresh: ()
                         activity.openDocument.launch(("image/*"))
                     }
                 } else if (it.itemId == R.id.chooseApp) {
-                    if (activity is DirectActivity) {
-                        activity.chooseAppIcon.launch(
-                            Intent(activity, ChooseAppActivity::class.java)
-                        )
-                    } else if (activity is AppDirectListActivity) {
-                        activity.chooseAppIcon.launch(
-                            Intent(activity, ChooseAppActivity::class.java)
-                        )
-                    }
+                    chooseIconApp()
                 }
                 true
             }
@@ -160,6 +154,7 @@ class DirectEditDialog(val activity: FragmentActivity, private val onRefresh: ()
 
     fun setDirect(direct: NewDirectEntity?) {
         this.directEntity = direct
+        localBitmap = null
         this.selectPackageName = direct?.packageName ?: ""
         this.selectAppName = direct?.appName ?: ""
         binding.run {
@@ -206,7 +201,7 @@ class DirectEditDialog(val activity: FragmentActivity, private val onRefresh: ()
                 val execMode = if (binding.rootSwitch.isChecked) ExecMode.ROOT else ExecMode.SCHEME
                 val deferred = async(Dispatchers.IO) {
                     val localIcon = if (localBitmap == null) {
-                        ""
+                        directEntity?.localIcon ?: ""
                     } else {
                         Base64.encodeToString(localBitmap!!.toByteArray(), Base64.DEFAULT)
                     }
@@ -284,15 +279,13 @@ class DirectEditDialog(val activity: FragmentActivity, private val onRefresh: ()
         }
     }
 
-    private fun setPackageName(packageName: String) {
+    fun setPackageName(packageName: String) {
         selectPackageName = packageName
         val packageInfo = activity.packageManager.getPackageInfo(packageName, 0)
         val appName =
             packageInfo.applicationInfo.loadLabel(activity.packageManager).toString()
         selectAppName = appName
         binding.directApp.text = appName
-        if (localBitmap == null) {
-            setAppIcon(packageName)
-        }
+        setAppIcon(packageName)
     }
 }

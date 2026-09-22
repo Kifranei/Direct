@@ -120,13 +120,17 @@ class DataViewModel @Inject constructor() : ViewModel() {
                         updateSearchEngine()
                     }
                     if (MMKVConstants.showSearchKeyword && MMKVConstants.onlyAssociation) return
-                    if (MMKVConstants.autoCopyWhenSearch && word.isNotBlank()) DirectApp.App.copyToClipboard(
-                        word
-                    )
+                    copySearchContent(word, isSearchEngineSearch = false)
                     searchByKeyWord(it)
                 }
             }
         }
+    }
+
+    fun copySearchContent(word: String, isSearchEngineSearch: Boolean) {
+        if (word.isBlank() || !MMKVConstants.autoCopyWhenSearch) return
+        if (MMKVConstants.autoCopyOnlyWhenSearchEngine != isSearchEngineSearch) return
+        DirectApp.App.copyToClipboard(word)
     }
 
 

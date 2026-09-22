@@ -80,6 +80,17 @@ class AppDirectListActivity : DirectBaseActivity() {
             }
         }
 
+    // 快捷方式指定应用
+    val chooseDirectAppForEditLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+            activityResult.data?.let {
+                val packageName = it.getStringExtra("packageName") ?: ""
+                if (directEditDialog.isShowing && packageName.isNotEmpty()) {
+                    directEditDialog.setPackageName(packageName)
+                }
+            }
+        }
+
     override fun initView() {
         val appName = if (isAppInstalled(appPackageName)) packageManager.getPackageInfo(
             appPackageName,
