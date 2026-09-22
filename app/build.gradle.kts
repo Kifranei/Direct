@@ -13,14 +13,17 @@ plugins {
     id("kotlin-parcelize")
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
-    id("com.google.firebase.firebase-perf")
 }
 
-//apply plugin: "com.google.gms.google-services"
-//apply plugin: "com.google.firebase.crashlytics"
-//apply plugin: "com.google.firebase.firebase-perf"
+// Firebase is optional for local builds. The services plugins require a real
+// google-services.json; using placeholder values makes FirebaseInitProvider
+// crash before the application can start.
+val hasGoogleServicesConfig = file("google-services.json").isFile
+if (hasGoogleServicesConfig) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+    apply(plugin = "com.google.firebase.firebase-perf")
+}
 
 val baseVersion = "1.5.5"
 val verName = "${baseVersion}.${getGitHash()}"
@@ -162,10 +165,12 @@ dependencies {
 
     implementation("androidx.work:work-runtime-ktx:2.8.1")
 
-    implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
-    implementation("com.google.firebase:firebase-perf-ktx")
+    if (hasGoogleServicesConfig) {
+        implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
+        implementation("com.google.firebase:firebase-analytics-ktx")
+        implementation("com.google.firebase:firebase-crashlytics-ktx")
+        implementation("com.google.firebase:firebase-perf-ktx")
+    }
 
 //    implementation("com.sackcentury:shinebutton:1.0.0")
     implementation("com.github.promeg:tinypinyin:2.0.3")

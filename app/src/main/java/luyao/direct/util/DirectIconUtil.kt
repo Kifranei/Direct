@@ -82,65 +82,57 @@ import luyao.ktx.util.getCircleTextBitmap
 //    }
 //}
 
-fun NewDirectEntity.loadIcon(view: ImageView) {
-    if (!localIcon.isNullOrEmpty()) {
-        val localIcon = Base64.decode(localIcon, Base64.DEFAULT)
-        Glide.with(view).load(localIcon).addListener(object : RequestListener<Drawable> {
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
-                return true
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-                resource?.let {
-                    view.setImageDrawable(it)
-                    AppIconCache.put("${packageName}${label}", it.toBitmap())
-                }
-                return true
-            }
-        }).into(view)
-    } else if (!iconUrl.isNullOrEmpty()) {
-        Glide.with(view).load(iconUrl).addListener(object : RequestListener<Drawable> {
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
-                return true
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-                resource?.let {
-                    view.setImageDrawable(it)
-                    AppIconCache.put("${packageName}${label}", it.toBitmap())
-                }
-                return true
-            }
-        }).into(view)
-    } else if (packageName.isNotEmpty()) {
+private fun NewDirectEntity.loadFallbackIcon(view: ImageView) {
+    if (packageName.isNotEmpty()) {
         AppIconCache.setImageViewBitmap(packageName, label, view)
-    } else {
-        val circleTextBitmap = getCircleTextBitmap(label.substring(0, 1), dp2px(40).toInt())
-        AppIconCache.put("${packageName}${label}", circleTextBitmap)
-        Glide.with(view).load(circleTextBitmap)
-            .into(view)
+        if (view.drawable != null) return
+    }
+
+    val firstCharacter = label.firstOrNull()?.toString() ?: "?"
+    val circleTextBitmap = getCircleTextBitmap(firstCharacter, dp2px(40).toInt())
+    AppIconCache.put("${packageName}${label}", circleTextBitmap)
+    view.setImageBitmap(circleTextBitmap)
+}
+
+private fun NewDirectEntity.loadIconResource(view: ImageView, resource: Any) {
+    Glide.with(view).load(resource).addListener(object : RequestListener<Drawable> {
+        override fun onLoadFailed(
+            e: GlideException?,
+            model: Any?,
+            target: Target<Drawable>?,
+            isFirstResource: Boolean
+        ): Boolean {
+            loadFallbackIcon(view)
+            return true
+        }
+
+        override fun onResourceReady(
+            resource: Drawable?,
+            model: Any?,
+            target: Target<Drawable>?,
+            dataSource: DataSource?,
+            isFirstResource: Boolean
+        ): Boolean {
+            resource?.let {
+                view.setImageDrawable(it)
+                AppIconCache.put("${packageName}${label}", it.toBitmap())
+            }
+            return true
+        }
+    }).into(view)
+}
+
+fun NewDirectEntity.loadIcon(view: ImageView) {
+    Glide.with(view).clear(view)
+    view.setImageDrawable(null)
+    loadFallbackIcon(view)
+
+    if (!localIcon.isNullOrEmpty()) {
+        runCatching { Base64.decode(localIcon, Base64.DEFAULT) }
+            .onSuccess { loadIconResource(view, it) }
+            .onFailure { loadFallbackIcon(view) }
+    } else if (!iconUrl.isNullOrEmpty()) {
+        loadIconResource(view, iconUrl)
     }
 }
 
