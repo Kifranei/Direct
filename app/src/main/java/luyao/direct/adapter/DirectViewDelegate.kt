@@ -89,6 +89,9 @@ class DirectViewDelegate(val activity: DirectActivity) :
             menuInflater.inflate(R.menu.menu_direct, menu)
             setOnMenuItemClickListener {
                 when (it.itemId) {
+                    R.id.edit_direct -> {
+                        activity.editDirect(directEntity)
+                    }
                     R.id.menu_direct_see -> {
                         activity.startActivity<AppDirectListActivity>(
                             "packageName" to directEntity.packageName,

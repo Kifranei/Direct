@@ -18,7 +18,9 @@ import luyao.direct.model.MMKVConstants
 import luyao.direct.model.dao.AppDao
 import luyao.direct.model.dao.NewDirectDao
 import luyao.direct.model.entity.NewBackupEntity
+import luyao.direct.model.AppIconCache
 import luyao.direct.util.MoshiUtil
+import luyao.direct.util.DirectInit
 import luyao.direct.util.WebDavUtil
 import luyao.ktx.ext.versionName
 import luyao.ktx.util.YLog
@@ -149,6 +151,8 @@ class BackupViewModel @Inject constructor() : ViewModel() {
                     }
                     MMKV.restoreAllFromDirectory(destMMKVDir.path)
                 }
+                DirectInit.init(DirectApp.App)
+                AppIconCache.clear()
                 backupResult.postValue(Result.success(DirectApp.App.getString(R.string.restore_success)))
             } catch (e: Exception) {
                 backupResult.postValue(Result.failure(Exception(DirectApp.App.getString(R.string.restore_failed))))

@@ -21,7 +21,8 @@ fun getCircleTextBitmap(text: String, width: Int): Bitmap {
     val bitmap = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888)
     val paint = Paint(Paint.ANTI_ALIAS_FLAG) // 抗锯齿
     val canvas = Canvas(bitmap)
-    paint.color = Color.parseColor(colors[text.hashCode() % colors.size])
+    val colorIndex = (text.hashCode() % colors.size + colors.size) % colors.size
+    paint.color = Color.parseColor(colors[colorIndex])
     paint.style = Paint.Style.FILL
     canvas.drawCircle(width / 2f, width / 2f, width / 2f, paint)
     paint.color = Color.WHITE

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/edit_direct"
+        android:title="@string/edit_direct" />
+
+    <item
         android:id="@+id/menu_direct_see"
         android:title="@string/look"/>
 

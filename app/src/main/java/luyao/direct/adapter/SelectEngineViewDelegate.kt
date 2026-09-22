@@ -4,10 +4,10 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.drakeet.multitype.ItemViewDelegate
 import luyao.direct.databinding.ItemSelectEngineBinding
 import luyao.direct.model.entity.NewDirectEntity
+import luyao.direct.util.loadIcon
 
 /**
  *  @author: luyao
@@ -25,7 +25,7 @@ class SelectEngineViewDelegate :
     override fun onBindViewHolder(holder: ViewHolder, item: NewDirectEntity) {
         holder.binding.run {
 //            engineCheck.isChecked = item.enabled == 0 && item.showPanel == 1
-            Glide.with(root).load(item.iconUrl).into(engineIcon)
+            item.loadIcon(engineIcon)
             engineName.text = item.label
             root.setOnClickListener {
                 checkChangeListener?.invoke(item, true)

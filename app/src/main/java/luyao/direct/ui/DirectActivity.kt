@@ -1015,6 +1015,16 @@ class DirectActivity : DirectBaseActivity(),
         }
     }
 
+    fun editDirect(directEntity: NewDirectEntity) {
+        if (directEditDialog == null) {
+            directEditDialog = DirectEditDialog(this) {
+                vm.updateDirect()
+            }
+        }
+        directEditDialog?.setDirect(directEntity)
+        directEditDialog?.show()
+    }
+
     private fun handleHistoryLongClick(view: View, position: Int, entity: Any) {
         // App，快捷方式，联系人长按不删除
         if (entity is AppEntity || entity is ContactEntity || entity is NewDirectEntity) return

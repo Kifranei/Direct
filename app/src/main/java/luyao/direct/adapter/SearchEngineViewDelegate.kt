@@ -9,10 +9,10 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.drakeet.multitype.ItemViewDelegate
 import luyao.direct.R
 import luyao.direct.model.entity.NewDirectEntity
+import luyao.direct.util.loadIcon
 
 /**
  *  @author: luyao
@@ -28,7 +28,7 @@ class SearchEngineViewDelegate :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, item: NewDirectEntity) {
-        Glide.with(holder.engineName).load(item.iconUrl).into(holder.engineImage)
+        item.loadIcon(holder.engineImage)
 //        entityResIds[item.id]?.let { holder.engineImage.setImageResource(it) }
         holder.engineName.text = item.label
 //        itemTouchHelper?.let {

@@ -23,9 +23,6 @@ object DirectInit {
     private fun initIconPackManager(context: Context) {
         iconPackManager.setContext(context)
         val map = iconPackManager.getAvailableIconPacks(true)
-        for ((key, value) in map) {
-            if (key == MMKVConstants.iconPack)
-                iconPack = value
-        }
+        iconPack = map[MMKVConstants.iconPack]
     }
 }
