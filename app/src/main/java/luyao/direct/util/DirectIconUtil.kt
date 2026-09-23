@@ -1,6 +1,7 @@
 package luyao.direct.util
 
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.BitmapDrawable
 import android.util.Base64
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
@@ -82,19 +83,7 @@ import luyao.ktx.util.getCircleTextBitmap
 //    }
 //}
 
-private fun NewDirectEntity.loadFallbackIcon(view: ImageView) {
-    if (packageName.isNotEmpty()) {
-        AppIconCache.setImageViewBitmap(packageName, label, view)
-        if (view.drawable != null) return
-    }
-
-    val firstCharacter = label.firstOrNull()?.toString() ?: "?"
-    val circleTextBitmap = getCircleTextBitmap(firstCharacter, dp2px(40).toInt())
-    AppIconCache.put("${packageName}${label}", circleTextBitmap)
-    view.setImageBitmap(circleTextBitmap)
-}
-
-private fun NewDirectEntity.loadIconResource(view: ImageView, resource: Any) {
+private fun NewDirectEntity.loadIconResource(view: ImageView, resource: Any, fallback: android.graphics.Bitmap) {
     Glide.with(view).load(resource).addListener(object : RequestListener<Drawable> {
         override fun onLoadFailed(
             e: GlideException?,
@@ -102,8 +91,7 @@ private fun NewDirectEntity.loadIconResource(view: ImageView, resource: Any) {
             target: Target<Drawable>?,
             isFirstResource: Boolean
         ): Boolean {
-            loadFallbackIcon(view)
-            return true
+            return false
         }
 
         override fun onResourceReady(
@@ -114,25 +102,26 @@ private fun NewDirectEntity.loadIconResource(view: ImageView, resource: Any) {
             isFirstResource: Boolean
         ): Boolean {
             resource?.let {
-                view.setImageDrawable(it)
                 AppIconCache.put("${packageName}${label}", it.toBitmap())
             }
-            return true
+            return false
         }
-    }).into(view)
+    }).placeholder(BitmapDrawable(view.resources, fallback))
+        .error(BitmapDrawable(view.resources, fallback))
+        .into(view)
 }
 
 fun NewDirectEntity.loadIcon(view: ImageView) {
     Glide.with(view).clear(view)
-    view.setImageDrawable(null)
-    loadFallbackIcon(view)
+    val viewWidth = if (view.width > 0) view.width else dp2px(40).toInt()
+    val fallback = AppIconCache.getImageBitmap(packageName, label, viewWidth)
+    view.setImageBitmap(fallback)
 
     if (!localIcon.isNullOrEmpty()) {
         runCatching { Base64.decode(localIcon, Base64.DEFAULT) }
-            .onSuccess { loadIconResource(view, it) }
-            .onFailure { loadFallbackIcon(view) }
+            .onSuccess { loadIconResource(view, it, fallback) }
     } else if (!iconUrl.isNullOrEmpty()) {
-        loadIconResource(view, iconUrl)
+        loadIconResource(view, iconUrl, fallback)
     }
 }
 

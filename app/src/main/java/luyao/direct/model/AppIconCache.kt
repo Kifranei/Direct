@@ -7,11 +7,11 @@ import android.util.LruCache
 import android.widget.ImageView
 import androidx.annotation.IntRange
 import androidx.core.graphics.drawable.toBitmap
+import com.bumptech.glide.Glide
 import luyao.direct.DirectApp
 import luyao.direct.util.DirectInit
 import luyao.ktx.ext.dp2px
 import luyao.ktx.util.getCircleTextBitmap
-import com.bumptech.glide.Glide
 
 /**
  * author: luyao
@@ -47,43 +47,45 @@ object AppIconCache {
         lruCache.evictAll()
     }
 
-    fun setImageViewBitmap(packageName: String, label: String, imageView: ImageView) {
-        Glide.with(imageView).clear(imageView)
-        imageView.setImageDrawable(null)
-
+    fun getImageBitmap(packageName: String, label: String, viewWidth: Int): Bitmap {
         // 不能仅使用 packageName 来区分，同一个应用可能有多个快捷方式
         val cacheKey = packageName + label
         val cacheBitmap = get(cacheKey) ?: get(packageName)
         if (cacheBitmap != null && !cacheBitmap.isRecycled) {
-            imageView.setImageBitmap(cacheBitmap)
             put(cacheKey, cacheBitmap)
-        } else {
-            try {
-                val viewWidth = if (imageView.width > 0) imageView.width else dp2px(36).toInt()
-
-                val bitmap = DirectApp.App.packageManager.run {
-                    getPackageInfo(packageName, 0).applicationInfo.loadIcon(this)
-                        .toBitmap(width = viewWidth, height = viewWidth)
-                }
-                if (MMKVConstants.iconPack.isNotEmpty()) {
-                    val icon =
-                        DirectInit.iconPack?.getDrawableIconForPackage(packageName, null)
-                            ?.toBitmap(width = viewWidth, height = viewWidth) ?: bitmap
-                    imageView.setImageBitmap(icon)
-                    put(packageName, icon)
-                    put(cacheKey, icon)
-                } else {
-                    imageView.setImageBitmap(bitmap)
-                    put(packageName, bitmap)
-                    put(packageName + label, bitmap)
-                }
-            } catch (e: Exception) {
-                val fallbackLabel = label.firstOrNull()?.toString() ?: "?"
-                val fallback = getCircleTextBitmap(fallbackLabel, dp2px(36).toInt())
-                imageView.setImageBitmap(fallback)
-                put(cacheKey, fallback)
-            }
+            return cacheBitmap
         }
+
+        if (packageName.isEmpty()) {
+            return getCircleTextBitmap(label.firstOrNull()?.toString() ?: "?", viewWidth)
+                .also { put(cacheKey, it) }
+        }
+
+        return try {
+            val bitmap = DirectApp.App.packageManager.run {
+                getPackageInfo(packageName, 0).applicationInfo.loadIcon(this)
+                    .toBitmap(width = viewWidth, height = viewWidth)
+            }
+            val icon = if (MMKVConstants.iconPack.isNotEmpty()) {
+                DirectInit.iconPack?.getDrawableIconForPackage(packageName, null)
+                    ?.toBitmap(width = viewWidth, height = viewWidth) ?: bitmap
+            } else {
+                bitmap
+            }
+            put(packageName, icon)
+            put(cacheKey, icon)
+            icon
+        } catch (e: Exception) {
+            val fallback = getCircleTextBitmap(label.firstOrNull()?.toString() ?: "?", viewWidth)
+            put(cacheKey, fallback)
+            fallback
+        }
+    }
+
+    fun setImageViewBitmap(packageName: String, label: String, imageView: ImageView) {
+        Glide.with(imageView).clear(imageView)
+        val viewWidth = if (imageView.width > 0) imageView.width else dp2px(36).toInt()
+        imageView.setImageBitmap(getImageBitmap(packageName, label, viewWidth))
     }
 
     fun checkCache(packageName: String, activityInfo: LauncherActivityInfo? = null) {
